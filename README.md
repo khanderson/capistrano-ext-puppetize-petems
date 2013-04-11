@@ -1,41 +1,40 @@
-# capistrano-ext-puppetize
+# capistrano-ext-puppetize-petems
 
-A Capistrano extension to run Puppet manifests contained in the application repository before deploying the application.  This means that all third party daemons, configs, services, libraries and other dependencies of an application can be specified by that application.
+This is my fork of the [capistrano-ext-puppetize](https://github.com/petems/capistrano-ext-puppetize) gem. I made a few changes and tweaks, plus I'm hosting it on Rubygems.
 
+## What
 
-## Where it fits in the bootstrapping picture
+This is a Capistrano extension to run Puppet manifests contained in the application repository before deploying the application.
 
-It requires that the host(s) deployed onto already has installed Puppet and a version of Ruby capable of running it: at Simply Business we install the CentOS system Ruby and the Puppet RPMs from Puppet Labs in our base image/AMIs
+Requirements:
 
-It doesn't need RVM installed beforehand - we usually use it to install RVM and the application-specific Ruby.
+* Puppet must already be installed on the system (TO-DO: add a task to test this)
 
-
-## How to use it 
+## How
 
 At the top of `Capfile` or `config/deploy.rb` add the line
 ````
 require "capistrano/ext/puppetize"
 ````
-This will define a Capistrano recipe `puppet:install` and hook it to run before `deploy:finalize_update`.  
+This will define a Capistrano recipe `puppet:install` and hook it to run before `deploy:finalize_update`.
 
-### What it does
+## When
 
-By default, when the recipe runs it will cause the creation and execution of a file `/etc/puppet/apply` on the target machine which runs Puppet in standalone (masterless) mode with a slew of appropriate parameters and options:
+By default, when the recipe runs it will cause the creation and execution of a file  on the target machine which runs Puppet in standalone (masterless) mode with a slew of appropriate parameters and options.
 
+By default:
 * the puppet manifest in `config/puppet/manifests/site.pp` is run
 
-* all string-valued Capistrano configuration variables will be available as facts, with names prefixed `cap_` - for example, the Capistrano `:deploy_to` setting is available as the Puppet fact `cap_deploy_to`.  Note that this does not cause the evaluation of variables that have not yet been evaluated (otherwise you tend to get annoying password prompts) 
+* all string-valued Capistrano configuration variables will be available as facts, with names prefixed `cap_` - for example, the Capistrano `:deploy_to` setting is available as the Puppet fact `cap_deploy_to`.
 
 * a fileserver configuration is created such that `puppet:///files/foo` refers to `config/puppet/files/foo` and `puppet:///root/foo` refers to `foo` in the top directory of the project
 
-* the modulepath is set to find modules in `config/puppet/modules` and 
+* the modulepath is set to find modules in `config/puppet/modules` and
 `config/puppet/vendor/modules`
 
 * the template directory is set to `config/puppet/templates`
 
-The file `/etc/puppet/apply` is a perfectly ordinary shell script which can also be run at other times (e.g. unattended at boot, or from cron) to ensure that the system state is correct without having to do a deploy.
-
-NOTE: These paths will be different if you have specified custom parameters in the `deploy.rb` file (See below)
+The file created (by default located at `/etc/puppet/apply`) is a perfectly ordinary shell script which can also be run at other times (e.g. unattended at boot, or from cron) to ensure that the system state is correct without having to do a deploy.
 
 ### Customising parameters
 
@@ -51,13 +50,13 @@ set :puppet_install_dir, "/opt/scripts/puppet"
 
 ### Living with RVM
 
-1. Remove any/all use of the rvm-capistrano extension, which interferes badly with our desire to run things on RVM-less systems. 
+1. Remove any/all use of the rvm-capistrano extension, which interferes badly with our desire to run things on RVM-less systems.
 
 1. If you are using bundler and intend to use RVM, set the `bundle_cmd` setting appropriately (and make sure you're using it instead of hardcoding the string)
 
 ````
 set :rvm_ruby_string, '1.9.3-p194'
-set :bundle_cmd, "rvm #{rvm_ruby_string} do bundle" 
+set :bundle_cmd, "rvm #{rvm_ruby_string} do bundle"
 # ...
 run "cd #{current_path} && #{try_sudo} #{bundle_cmd} exec unicorn -c #{current_path}/config/unicorn.xhr.rb -E #{rails_env} -D"
 ````
@@ -67,5 +66,4 @@ run "cd #{current_path} && #{try_sudo} #{bundle_cmd} exec unicorn -c #{current_p
 set :whenever_command, "#{fetch(:bundle_cmd)} exec whenever"
 ````
 1. A convenient way of installing RVM using Puppet is to use the puppet module at https://github.com/jfryman/puppet-rvm
-
 

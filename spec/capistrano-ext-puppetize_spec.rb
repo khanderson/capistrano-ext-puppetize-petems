@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe Capistrano::Puppetize, "loaded into a configuration" do
+describe Capistrano::Puppetize do
 	before do
 		@configuration = Capistrano::Configuration.new
     @configuration.extend(Capistrano::Spec::ConfigurationExtension)

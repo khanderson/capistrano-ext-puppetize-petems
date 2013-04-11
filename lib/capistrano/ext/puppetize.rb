@@ -17,7 +17,7 @@ module Capistrano
             join(" ")
 
             puppet_location = fetch(:puppet_install_dir, "/etc/puppet")
-  
+
             # create puppet/fileserver.conf from given puppet file location
             puppet_d= fetch(:project_puppet_dir, "#{current_release}/config/puppet")
             put(<<FILESERVER, "#{puppet_d}/fileserver.conf")
@@ -38,34 +38,6 @@ FILESERVER
 P_APPLY
             run "chmod a+x #{puppet_location}/apply"
             run "sudo #{puppet_location}/apply"
-          end
-          task :install_vagrant do
-            # For testing under Vagrant/VirtualBox we can also write
-            # /etc/puppet/vagrant-apply which runs puppet
-            # using files in the /vagrant directory.  On vagrant+virtualbox
-            # deployments this is a shared directory which maps onto the
-            # host's project checkout area, so puppet tweaks can be made and
-            # tested locally without pushing each change to github.
-            test_d="/vagrant/config/puppet"
-            put(<<V_FILESERVER,"/tmp/fileserver.conf")
-[files]
-  path #{test_d}/files
-  allow 127.0.0.1
-[root]
-  path /vagrant
-  allow 127.0.0.1
-V_FILESERVER
-
-            put(<<V_APPLY, "#{puppet_location}/vagrant-apply")
-#!/bin/sh
-#{facts} puppet apply \\
- --modulepath=#{test_d}/modules:#{test_d}/vendor/modules \\
- --templatedir=#{test_d}/templates  \\
- --fileserverconfig=/tmp/fileserver.conf  \\
- #{test_d}/manifests/site.pp
-V_APPLY
-
-            run "chmod a+x #{puppet_location}/vagrant-apply"
           end
         end
       end

@@ -8,6 +8,8 @@ describe Capistrano::Puppetize do
     Capistrano::Puppetize.load_into(@configuration)
   end
 
+  subject(:puppetize) { @configuration }
+
   describe 'puppet namespace' do
     before do
       @configuration.set(:deployer, "JC Denton")
@@ -19,18 +21,18 @@ describe Capistrano::Puppetize do
     end
 
     it "defines puppet:install" do
-      @configuration.find_and_execute_task('puppet:install')
-      @configuration.find_task('puppet:install').should_not eql nil
+      puppetize.find_and_execute_task('puppet:install')
+      puppetize.find_task('puppet:install')
     end
 
     it "performs puppet:install before deploy:finalize_update" do
-      @configuration.should callback('puppet:install').before('deploy:finalize_update')
+      puppetize.should callback('puppet:install').before('deploy:finalize_update')
     end
 
     it 'should create the puppet file and run it' do
-      @configuration.find_and_execute_task('puppet:install')
-      @configuration.should have_run("chmod a+x /etc/puppet/apply")
-      @configuration.should have_run("sudo /etc/puppet/apply")
+      puppetize.find_and_execute_task('puppet:install')
+      puppetize.should have_run("chmod a+x /etc/puppet/apply")
+      puppetize.should have_run("sudo /etc/puppet/apply")
     end
 
   end

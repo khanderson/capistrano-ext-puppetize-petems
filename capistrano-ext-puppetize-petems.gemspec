@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'capistrano-spec'
+  spec.add_development_dependency 'rake'
 
   spec.require_path = 'lib'
 end

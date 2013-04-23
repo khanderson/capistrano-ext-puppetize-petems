@@ -1,5 +1,7 @@
 # capistrano-ext-puppetize-petems
 
+[![Build Status](https://travis-ci.org/petems/capistrano-ext-puppetize-petems.png?branch=master)](https://travis-ci.org/petems/capistrano-ext-puppetize-petems)
+
 This is my fork of the [capistrano-ext-puppetize](https://github.com/petems/capistrano-ext-puppetize) gem. I made a few changes and tweaks, plus I'm hosting it on Rubygems.
 
 ## What

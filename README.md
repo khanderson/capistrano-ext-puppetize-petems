@@ -1,8 +1,8 @@
-# capistrano-ext-puppetize-petems
+# capistrano3-ext-puppetize
 
 [![Build Status](https://travis-ci.org/petems/capistrano-ext-puppetize-petems.png?branch=master)](https://travis-ci.org/petems/capistrano-ext-puppetize-petems)
 
-This is my fork of the [capistrano-ext-puppetize](https://github.com/petems/capistrano-ext-puppetize) gem. I made a few changes and tweaks, plus I'm hosting it on Rubygems.
+This is a fork of the [capistrano-ext-puppetize](https://github.com/petems/capistrano-ext-puppetize) gem that has been suitably upgraded to work with Capistrano 3 (there were significant API changes between versions 2 and 3).
 
 ## What
 
@@ -42,30 +42,12 @@ The file created (by default located at `/etc/puppet/apply`) is a perfectly ordi
 
 You can specify options for your project but adding the following to the deploy.rb:
 ```ruby
-set :project_puppet_dir, "foo/bar/"
-#Default location if not set: #{current_release}/config/puppet/
+set :project_puppet_dir, -> { "#{release_path}/config/puppet" }
+#Default location if not set: #{release_path}/config/puppet/
 
 To specify where to put the puppet executable `apply` file
-set :puppet_install_dir, "/opt/scripts/puppet"
+set :puppet_install_dir, -> { "#{release_path}/resources/puppet" }
 #Default location if not set: /etc/puppet/
 ```
 
-### Living with RVM
-
-1. Remove any/all use of the rvm-capistrano extension, which interferes badly with our desire to run things on RVM-less systems.
-
-1. If you are using bundler and intend to use RVM, set the `bundle_cmd` setting appropriately (and make sure you're using it instead of hardcoding the string)
-
-````
-set :rvm_ruby_string, '1.9.3-p194'
-set :bundle_cmd, "rvm #{rvm_ruby_string} do bundle"
-# ...
-run "cd #{current_path} && #{try_sudo} #{bundle_cmd} exec unicorn -c #{current_path}/config/unicorn.xhr.rb -E #{rails_env} -D"
-````
-
-1. Likewise for other commands that need to run in the context of rvm
-````
-set :whenever_command, "#{fetch(:bundle_cmd)} exec whenever"
-````
-1. A convenient way of installing RVM using Puppet is to use the puppet module at https://github.com/jfryman/puppet-rvm
-
+The directories can be given as Strings or Procs; be warned that if you provide a string that refers to release_path too early in your Capfile it will return a value like .../current/... instead of the timestamped release directory.

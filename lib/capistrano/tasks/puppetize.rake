@@ -13,6 +13,12 @@ namespace :puppet do
 
     # create puppet/fileserver.conf from given puppet file location
     puppet_d = fetch(:project_puppet_dir, "#{release_path}/config/puppet")
+    
+    # Allow directories to to be given as procs.
+    # If it depends on release_path this is important as release_path isn't set right early on.
+    puppet_d.is_a?(Proc) and puppet_d = puppet_d.call
+    puppet_location.is_a?(Proc) and puppet_location = puppet_location.call
+    
     fileserver_conf = <<ENDS
 [files]
   path #{puppet_d}/files

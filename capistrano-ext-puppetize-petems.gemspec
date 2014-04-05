@@ -1,23 +1,41 @@
-$:.push File.expand_path("../lib", __FILE__)
+# -*- encoding: utf-8 -*-
+# stub: capistrano3-ext-puppetize 0.5.0 ruby lib
 
-require 'capistrano/ext/puppetize/version'
+Gem::Specification.new do |s|
+  s.name = "capistrano3-ext-puppetize"
+  s.version = "0.5.0"
 
-Gem::Specification.new do |spec|
-  spec.name = 'capistrano-ext-puppetize-petems'
-  spec.version = Capistrano::Ext::Puppetize::Version::STRING
-  spec.platform = Gem::Platform::RUBY
-  spec.authors = ['Peter M Souter']
-  spec.email = ['p.morsou@gmail.com']
-  spec.summary = 'Run Puppet manifests in a Capistrano deployment'
-  spec.description = 'Capistrano extension to run Puppet manifests contained in the application to be deployed'
-  spec.license = 'MIT'
+  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.authors = ["Simply Business", "Peter M Souter", "Karl Anderson"]
+  s.date = "2014-04-05"
+  s.description = "Capistrano extension to run Puppet manifests contained in the application to be deployed"
+  s.email = ["Karl.Anderson@propelr.net"]
+  s.licenses = ["MIT"]
+  s.require_paths = ["lib"]
+  s.rubygems_version = "2.1.10"
+  s.summary = "Run Puppet manifests in a Capistrano deployment"
 
-  spec.add_dependency 'capistrano', '>=2.0.0'
-  spec.add_dependency 'capistrano-ext'
+  if s.respond_to? :specification_version then
+    s.specification_version = 4
 
-  spec.add_development_dependency 'rspec'
-  spec.add_development_dependency 'capistrano-spec'
-  spec.add_development_dependency 'rake'
-
-  spec.require_path = 'lib'
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<capistrano>, [">= 3.0.0"])
+      s.add_runtime_dependency(%q<capistrano-ext>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, [">= 0"])
+      s.add_development_dependency(%q<capistrano-spec>, [">= 0"])
+      s.add_development_dependency(%q<rake>, [">= 0"])
+    else
+      s.add_dependency(%q<capistrano>, [">= 2.0.0"])
+      s.add_dependency(%q<capistrano-ext>, [">= 0"])
+      s.add_dependency(%q<rspec>, [">= 0"])
+      s.add_dependency(%q<capistrano-spec>, [">= 0"])
+      s.add_dependency(%q<rake>, [">= 0"])
+    end
+  else
+    s.add_dependency(%q<capistrano>, [">= 2.0.0"])
+    s.add_dependency(%q<capistrano-ext>, [">= 0"])
+    s.add_dependency(%q<rspec>, [">= 0"])
+    s.add_dependency(%q<capistrano-spec>, [">= 0"])
+    s.add_dependency(%q<rake>, [">= 0"])
+  end
 end

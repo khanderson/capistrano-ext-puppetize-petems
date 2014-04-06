@@ -3,11 +3,6 @@ before "deploy:updated", "puppet:install"
 namespace :puppet do
   desc "Install and run puppet manifests"
   task :install do
-    # Export capistrano variables as Puppet facts so that the
-    # site.pp manifest can make decisions on what to install based
-    # on its role and environment.  We only export string variables
-    # -- not class instances, procs, and other outlandish values
-    facts = Capistrano::Puppetize.load_facts
 
     puppet_location = fetch(:puppet_install_dir, "/etc/puppet")
 
@@ -18,8 +13,16 @@ namespace :puppet do
     # If it depends on release_path this is important as release_path isn't set right early on.
     puppet_d.is_a?(Proc) and puppet_d = puppet_d.call
     puppet_location.is_a?(Proc) and puppet_location = puppet_location.call
-    
-    fileserver_conf = <<ENDS
+
+    on roles(fetch(:puppet_roles, :all)) do |host|
+      # Export capistrano variables as Puppet facts so that the
+      # site.pp manifest can make decisions on what to install based
+      # on its role and environment.  We only export string variables
+      # -- not class instances, procs, and other outlandish values
+      facts = Capistrano::Puppetize.global_facts.merge(Capistrano::Puppetize.host_facts(host))
+      facter_environment = Capistrano::Puppetize.build_facter_environment(facts)
+      
+      fileserver_conf = <<ENDS
 [files]
   path #{puppet_d}/files
   allow 127.0.0.1
@@ -28,20 +31,19 @@ namespace :puppet do
 ENDS
   
     # A puppet run can be started at any time by running the created puppet file (eg. /etc/puppet/apply)
-    apply_script = <<ENDS
-    #!/bin/sh
-#{facts} puppet apply \\
+      apply_script = <<ENDS
+#!/bin/sh
+#{facter_environment} puppet apply \\
  --modulepath=#{puppet_d}/modules:#{puppet_d}/vendor/modules \\
  --templatedir=#{puppet_d}/templates \\
  --fileserverconfig=#{puppet_d}/fileserver.conf \\
  #{puppet_d}/manifests/site.pp
 ENDS
 
-    on roles(fetch(:puppet_roles, :all)) do |host|
       upload! StringIO.new(fileserver_conf), "#{puppet_d}/fileserver.conf"
       upload! StringIO.new(apply_script), "#{puppet_location}/apply"
-      run "chmod a+x #{puppet_location}/apply"
-      run "sudo #{puppet_location}/apply"
+      execute "chmod a+x #{puppet_location}/apply"
+      execute "sudo #{puppet_location}/apply"
     end
   end
 
@@ -67,7 +69,6 @@ ENDS
   allow 127.0.0.1
 ENDS
 
-
     vagrant_apply = <<-ENDS 
 #!/bin/sh
 #{facts} puppet apply \\
@@ -80,8 +81,8 @@ ENDS
     on roles(fetch(:puppet_roles, :all)) do |host|
       upload! StringIO.new(fileserver_conf), "/tmp/fileserver.conf"
       upload! StringIO.new(vagrant_apply), "#{puppet_location}/vagrant-apply"
-      run "chmod a+x #{puppet_location}/vagrant-apply"
-      run "sudo #{puppet_location}/vagrant-apply"
+      execute "chmod a+x #{puppet_location}/vagrant-apply"
+      execute "sudo #{puppet_location}/vagrant-apply"
     end
   end
 end
